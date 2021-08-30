@@ -1,7 +1,38 @@
-import React, { useState, useEffect, CSSProperties } from 'react'
+import React, { useState, useEffect, CSSProperties, useRef } from 'react'
 
 import useChat from '../../hooks/useChat'
 import useWindowWidth from '../../hooks/useWindowWidth'
+
+
+type DriftEventPayloads = {
+  startConversation: {
+    conversationId: number;
+    inboxId: number;
+  };
+  chatOpen: undefined;
+  chatClose: undefined;
+  "conversation:buttonClicked": {
+    conversationId: number;
+    messageId: number;
+    createdAt: number;
+    authorId: number;
+    questionId: number;
+    buttonBody: string;
+    playbookId?: number;
+    interactionId?: number;
+    campaignId?: number;
+  };
+};
+
+type DriftEventHandler<P> = (data: P) => void;
+
+export type DriftEventHandlers = {
+  [K in keyof DriftEventPayloads]?: DriftEventHandler<DriftEventPayloads[K]>;
+};
+
+function getDriftEventKeys(eventHandlers : DriftEventHandlers){
+  return Object.keys(eventHandlers) as (keyof DriftEventPayloads)[];
+}
 
 const styles: {
   container: CSSProperties
@@ -43,13 +74,35 @@ const styles: {
 interface Props {
   color?: string
   icon?: 'A' | 'B' | 'C' | 'D'
+  events?: DriftEventHandlers
+}
+
+
+function registerEvents(events?: DriftEventHandlers, previousEvents?: DriftEventHandlers){
+  if(previousEvents){
+    getDriftEventKeys(previousEvents).forEach((eventName) => {
+      if(events?.[eventName]){
+        window.drift.off(eventName, previousEvents[eventName])
+    }
+    });
+  }
+
+  if(events){
+    getDriftEventKeys(events).forEach((eventName) => {
+      // Drift will log a warning on unknown events,
+      // and log an error if the handler is not a function
+      window.drift.on(eventName, events[eventName]);
+    });
+  }
 }
 
 const Drift = ({
   color = '#0176ff',
-  icon = 'A'
+  icon = 'A',
+  events
 }: Props): JSX.Element | null => {
   const [state, loadChat] = useChat({ loadWhenIdle: true })
+  const eventsRef = useRef<DriftEventHandlers>();
   const windowWidth = useWindowWidth()
   const [positionStyles, setPositionStyles] = useState<CSSProperties>({
     zIndex: 2147483648,
@@ -66,6 +119,15 @@ const Drift = ({
       right: windowWidth < 768 ? 0 : '24px'
     }))
   }, [windowWidth])
+
+
+  useEffect(() => {
+    if(state === 'complete'){
+      registerEvents(events, eventsRef.current)
+      eventsRef.current = events;
+    }
+  }, [state, events])
+
 
   if (state === 'complete') {
     return null
