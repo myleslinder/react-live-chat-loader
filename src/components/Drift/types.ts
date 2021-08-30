@@ -24,13 +24,13 @@ type ConversationBasePayload = {
 };
 export type DriftEventPayloads = {
   ready: [
-    any,
+    Record<string, (Record<string, () => void> | (() => void))>,
     {
       sidebarOpen: boolean;
       chatOpen: boolean;
       widgetVisible: boolean;
       isOnline: boolean;
-      teamAvailability: Record<string, any>;
+      teamAvailability: Record<number, Record<string, boolean>>;
     }
   ];
   chatOpen: EmptyPayload;
