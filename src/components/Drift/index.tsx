@@ -2,33 +2,8 @@ import React, { useState, useEffect, CSSProperties, useRef } from 'react'
 
 import useChat from '../../hooks/useChat'
 import useWindowWidth from '../../hooks/useWindowWidth'
+import { DriftEventHandlers, DriftEventPayloads } from './types';
 
-
-type DriftEventPayloads = {
-  startConversation: {
-    conversationId: number;
-    inboxId: number;
-  };
-  chatOpen: undefined;
-  chatClose: undefined;
-  "conversation:buttonClicked": {
-    conversationId: number;
-    messageId: number;
-    createdAt: number;
-    authorId: number;
-    questionId: number;
-    buttonBody: string;
-    playbookId?: number;
-    interactionId?: number;
-    campaignId?: number;
-  };
-};
-
-type DriftEventHandler<P> = (data: P) => void;
-
-export type DriftEventHandlers = {
-  [K in keyof DriftEventPayloads]?: DriftEventHandler<DriftEventPayloads[K]>;
-};
 
 function getDriftEventKeys(eventHandlers : DriftEventHandlers){
   return Object.keys(eventHandlers) as (keyof DriftEventPayloads)[];
