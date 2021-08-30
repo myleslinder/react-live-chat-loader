@@ -103,9 +103,12 @@ export default class Index extends React.Component {
 }
 ```
 
+Alternatively, if you do not want the facade, but only to load the chat script after the page has been idle for a defined period of time, you can call the `useChat` hook providing `true` for `loadWhenIdle`. The first call to the `useChat` hook will start the timer (5000ms by default, or the value of the `idlePeriod` prop passed to `LiveChatLoaderProvider`) to load the chat script. If you use a provider component and call useChat anywhere in the component hierarchy lower than the provider component, the arguments to useChat will have no effect.
+
+
 To display chat from a custom button you can import the `useChat`
 hook which has the current state of the chat and a function to load the
-chat.
+chat. The function to load the chat may be called anywhere in the component hierarchy beneath a LiveChatLoaderProvider regardless of if you use a provider component (it  will load the chat script if has not already been loaded).
 
 ```jsx
 import { useChat } from 'react-live-chat-loader'
@@ -124,7 +127,7 @@ You can pass the following props to the `LiveChatLoaderProvider` provider:
 - `provider`: Choose from `helpScout`, `intercom`, `drift` or `messenger` ([see below](#-supported-providers))
 - `providerKey`: Provider API Key ([see below](#-supported-providers))
 - `idlePeriod`: How long to wait in ms before loading the provider. Default is
-  `2000`. Set to `0` to never load. This value is used in a `setTimeout` in
+  `5000`. Set to `0` to never load. This value is used in a `setTimeout` in
   browsers that don't support `requestIdleCallback`.
 
 ## 💬 Supported Providers
